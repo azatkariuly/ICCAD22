@@ -123,7 +123,7 @@ def main():
         model_config = dict(model_config, **literal_eval(args.model_config))
 
     model = model(**model_config)
-    print(model)
+    #print(model)
     logging.info("created model with configuration: %s", model_config)
 
 
