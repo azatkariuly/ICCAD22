@@ -35,11 +35,11 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
 
     satmm_cuda_psum = satmm_psum.apply
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
-    print(psum)
 
     if step_size_psum is not None:
         psum_q, s = quant(psum, nbits_psum)
-        #print(psum_q)
+        print(psum.max(), psum.min(), s)
+        print(psum_q.max(), psum_q.min())
         #psum, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
 
         #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
