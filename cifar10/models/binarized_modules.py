@@ -35,6 +35,9 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
 
     satmm_cuda_psum = satmm_psum.apply
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
+    f = open('psum_n.txt', 'a')
+    f.write(psum)
+    f.close()
     print(psum)
     return
     if step_size_psum is not None:
