@@ -35,7 +35,7 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
 
     satmm_cuda_psum = satmm_psum.apply
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
-
+    return
     if step_size_psum is not None:
         psum_q, s = quant(psum, nbits_psum)
         #print(psum.max(), psum.min(), s)
