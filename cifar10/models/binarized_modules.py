@@ -113,7 +113,7 @@ def quant(v, p):
 
     v_q = (v/s).round()
 
-    return v_q * s
+    return v_q, s
 
 class BinarizeConv2d(nn.Conv2d):
 
