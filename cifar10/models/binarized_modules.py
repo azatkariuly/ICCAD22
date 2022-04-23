@@ -40,6 +40,7 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
         #psum_q, s = quant(psum, nbits_psum)
         #print(psum.max(), psum.min(), s)
         torch.save(psum_n, 'psum_n.pt')
+        return
         #print(psum_q)
         #print(s)
         #return
