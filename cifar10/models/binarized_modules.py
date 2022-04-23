@@ -46,15 +46,10 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
         #return
         #psum, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
 
-        out_n = torch.sum(psum_q, axis=3).squeeze().transpose(1,-1)
-
-        out_q = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
+        out = torch.sum(psum_q, axis=3).squeeze().transpose(1,-1)
         #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
         #out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
-        torch.save(psum_q, 'psum_q.pt')
-        torch.save(out_n, 'out_n.pt')
-        torch.save(out_q, 'out_q.pt')
-        return
+        #torch.save(psum_q, 'psum_q.pt')
         #out = cyclic_activation(out, k=2, b=b)
         return out * s #.round() #tep_size_psum
 
