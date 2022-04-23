@@ -49,8 +49,8 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
         #out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
         #out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
-        torch.save(out, 'out_q_sa.pt')
-        return
+        #torch.save(out, 'out_q_sa.pt')
+        #return
         #out = cyclic_activation(out, k=2, b=b)
         return out * s #.round() #tep_size_psum
 
