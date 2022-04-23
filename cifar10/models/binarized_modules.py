@@ -37,7 +37,7 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
     if step_size_psum is not None:
-        psum_q, s = quant(psum, nbits_psum-1)
+        psum_q, s = quant(psum, nbits_psum-2)
         #print(psum.max(), psum.min(), s)
         #torch.save(psum_q, 'psum_q_8.pt')
         #return
