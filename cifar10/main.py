@@ -105,12 +105,14 @@ def main():
     logging.info("saving to %s", save_path)
     logging.debug("run arguments: %s", args)
 
+    '''
     if 'cuda' in args.type:
         args.gpus = [int(i) for i in args.gpus.split(',')]
         torch.cuda.set_device(args.gpus[0])
         cudnn.benchmark = True
     else:
         args.gpus = None
+    '''
 
     # create model
     logging.info("creating model %s", args.model)
@@ -182,7 +184,8 @@ def main():
     #                                       'momentum': args.momentum,
     #                                       'weight_decay': args.weight_decay}})
     # define loss function (criterion) and optimizer
-    criterion = getattr(model, 'criterion', nn.CrossEntropyLoss)()
+    criterion  = nn.CrossEntropyLoss()
+    criterion = getattr(model, 'criterion', criterion.cuda())()
 
     criterion.type(args.type)
     model.type(args.type)
@@ -276,16 +279,8 @@ def main():
 
 
 def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=None):
-    if args.gpus and len(args.gpus) > 1:
-        '''
-        torch.cuda.set_device(args.gpus)
-        model.cuda(args.gpus)
-        args.batch_size = int(args.batch_size / len(args.gpus))
-        args.workers = int((args.workers + len(args.gpus) - 1)/len(args.gpus))
+    model = nn.DataParallel(model).cuda()
 
-        model = torch.nn.parallel.DistrbutedDataParallel(model, device_ids=[args.gpus])
-        '''
-        model = torch.nn.DataParallel(model, args.gpus)
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -299,6 +294,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
         # measure data loading time
         data_time.update(time.time() - end)
         if args.gpus is not None:
+            inputs = inputs.cuda()
             target = target.cuda()
 
         if not training:
