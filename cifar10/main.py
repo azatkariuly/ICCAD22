@@ -336,6 +336,9 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
         batch_time.update(time.time() - end)
         end = time.time()
 
+        for names, param in model.named_parameters():
+            print(names)
+
         # plot progress
         bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f} | ss: {ss: .4f}'.format(
                     phase='TRAINING' if training else 'EVALUATING',
@@ -349,7 +352,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                     top1=top1.avg,
                     top5=top5.avg,
                     #ss=16.0,
-                    ss=model.layer1.0.conv1.step_size_psum[0],
+                    ss=model.module.layer1[0].conv1.step_size_psum[0],
                     )
         bar.next()
 
