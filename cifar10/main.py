@@ -212,7 +212,7 @@ def main():
 
     i = 0
     for name, param in model.named_parameters():
-        if name.contains('step_size_psum'):
+        if 'step_size_psum' in name:
             print(name, 'true for this case')
         else:
             print(name)
