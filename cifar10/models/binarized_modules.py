@@ -118,7 +118,8 @@ def quant_PTQ1(v, s, p):
     #gradScaleFactor = 1.0 / math.sqrt(v.numel() * Qp)
     #s = grad_scale(s, gradScaleFactor)
 
-    #s = 2 * v.abs().mean() / math.sqrt(Qp)
+    s = 2 * v.abs().mean() / math.sqrt(Qp)
+    print(s)
 
     v_q = round_pass((v/s).clamp(Qn, Qp))
 
