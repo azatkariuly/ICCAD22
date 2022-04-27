@@ -184,8 +184,8 @@ def main():
     #                                       'momentum': args.momentum,
     #                                       'weight_decay': args.weight_decay}})
     # define loss function (criterion) and optimizer
-    criterion  = nn.CrossEntropyLoss()
-    criterion = getattr(model, 'criterion', criterion.cuda())()
+    criterion = getattr(model, 'criterion', nn.CrossEntropyLoss)()
+    criterion = criterion.cuda()
 
     criterion.type(args.type)
     model.type(args.type)
