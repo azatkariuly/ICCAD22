@@ -37,7 +37,7 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
     if step_size_psum is not None:
-        psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum-3)
+        psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
         #out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
         out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
@@ -123,6 +123,8 @@ class BinarizeConv2d(nn.Conv2d):
                                         padding=padding, dilation=dilation, groups=groups, bias=bias)
 
         self.nbits_acc = kwargs['nbits_acc']
+        self.nbits_psum = self.nbits_acc - 3
+
         self.T = kwargs['T']
         #self.k = kwargs['k']
 
@@ -147,7 +149,7 @@ class BinarizeConv2d(nn.Conv2d):
 
         out = satconv2D(input, self.weight, self.padding, self.stride,
                         T=self.T, b=self.nbits_acc, signed=True,
-                        nbits_psum=self.nbits_acc, step_size_psum=self.step_size_psum)
+                        nbits_psum=self.nbits_psum, step_size_psum=self.step_size_psum)
 
         #out = OA(out.int(), b=self.nbits_acc).float() + out - out.int()
 
