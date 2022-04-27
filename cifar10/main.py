@@ -336,7 +336,8 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
         batch_time.update(time.time() - end)
         end = time.time()
 
-        print(model)
+        for names, param in model.named_parameters():
+            print(names)
 
         # plot progress
         bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f} | ss: {ss: .4f}'.format(
