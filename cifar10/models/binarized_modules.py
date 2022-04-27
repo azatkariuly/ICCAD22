@@ -95,7 +95,8 @@ def quant(v, p):
     ma = v.max()
     mi = v.min()
 
-    s = (ma-mi)/2**p
+    #s = (ma-mi)/2**p
+    s = 128/2**p
 
     v_q = (v/s).round()
 
