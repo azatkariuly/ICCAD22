@@ -211,12 +211,14 @@ def main():
     #logging.info('training regime: %s', regime)
 
     i = 0
+    '''
     for name, param in model.named_parameters():
         if 'step_size_psum' not in name:
             param.requires_grad = False
         #param.requires_grad = False
         i += 1
-
+    '''
+    
     print('freezed', i, 'parameters')
 
     for epoch in range(args.start_epoch, args.epochs):
