@@ -212,11 +212,14 @@ def main():
 
     i = 0
     for name, param in model.named_parameters():
-        print(name)
+        if name.contains('step_size_psum'):
+            print(name, 'true for this case')
+        else:
+            print(name)
         #param.requires_grad = False
         i += 1
 
-    print('freezed', i, ' parameters')
+    print('freezed', i, 'parameters')
     return
 
     for epoch in range(args.start_epoch, args.epochs):
