@@ -351,6 +351,8 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                     #ss=16.0,
                     ss=model.module.layer1[0].conv1.step_size_psum[0],
                     )
+
+        print(model.module.conv1.weight)
         bar.next()
 
         #if i % args.print_freq == 0:
