@@ -199,6 +199,10 @@ def main():
     if args.evaluate:
         val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, 0)
         print('Best Accuracy:', val_prec1)
+
+        for name, param in model.named_parameters():
+            if 'step_size_psum' in name:
+                print(param)
         return
 
     train_data = get_dataset(args.dataset, 'train', transform['train'])
