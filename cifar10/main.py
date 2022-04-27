@@ -86,6 +86,12 @@ parser.add_argument('-s', '--s', default=2.0, type=float,
                     help='psum step size (default: 2.0)')
 
 def main():
+    if not torch.cuda.is_available():
+        sys.exit(1)
+
+    cudnn.benchmark = True
+    cudnn.enabled = True
+
     global args, best_prec1
     best_prec1 = 0
     args = parser.parse_args()
@@ -166,6 +172,8 @@ def main():
                          checkpoint_file, checkpoint['epoch'])
         else:
             logging.error("no checkpoint found at '%s'", args.resume)
+
+    model = nn.DataParallel(model).cuda()
 
     num_parameters = sum([l.nelement() for l in model.parameters()])
     logging.info("number of parameters: %d", num_parameters)
@@ -282,7 +290,6 @@ def main():
 
 
 def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=None):
-    model = nn.DataParallel(model).cuda()
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -296,9 +303,9 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
     for i, (inputs, target) in enumerate(data_loader):
         # measure data loading time
         data_time.update(time.time() - end)
-        if training and args.gpus is not None:
-            inputs = inputs.cuda()
-            target = target.cuda()
+
+        inputs = inputs.cuda()
+        target = target.cuda()
 
         if not training:
             with torch.no_grad():
