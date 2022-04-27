@@ -210,9 +210,12 @@ def main():
 
     #logging.info('training regime: %s', regime)
 
+    i = 0
     for name, param in model.named_parameters():
+        i += 1
         print(name) #, param)
 
+    print('Total: ', i)
     return
 
     for epoch in range(args.start_epoch, args.epochs):
