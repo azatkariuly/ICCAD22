@@ -133,7 +133,7 @@ def main():
 
         checkpoint = torch.load(args.pretrained)
         #load_my_state_dict(model, checkpoint['state_dict'])
-        model.load_state_dict(checkpoint['state_dict'], strict=False)
+        model.load_state_dict(checkpoint['state_dict']) #, strict=False)
 
         logging.info("loaded checkpoint '%s' (epoch %s)",
                      args.pretrained, checkpoint['epoch'])
@@ -211,12 +211,12 @@ def main():
     #logging.info('training regime: %s', regime)
 
     i = 0
-    for name, param in model.named_parameters():
+    for param in model.parameters():
+        param.requires_grad = False
         i += 1
-        print(name) #, param)
 
-    print('Total: ', i)
-    return
+    print('freezed', i, ' parameters')
+    #return
 
     for epoch in range(args.start_epoch, args.epochs):
         #for param_group in optimizer.param_groups:
@@ -351,8 +351,8 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                     loss=losses.avg,
                     top1=top1.avg,
                     top5=top5.avg,
-                    ss=16.0,
-                    #ss=model.layer1[0].conv1.step_size_psum[0],
+                    #ss=16.0,
+                    ss=model.layer1[0].conv1.step_size_psum[0],
                     )
         bar.next()
 
