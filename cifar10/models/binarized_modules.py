@@ -37,7 +37,7 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
     if step_size_psum is not None:
-        psum_q, s = quant_PTQ(psum, nbits_psum-3)
+        psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum-3)
         #out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
         out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
@@ -101,13 +101,16 @@ def quant(v, p):
 
     return v_q, s
 
-def quant_PTQ(v, p):
+def quant_PTQ(v, s, p):
     Qn = -2**(p-1)
     Qp = 2**(p-1) - 1
 
-    s = 2 * v.abs().mean() / math.sqrt(Qp)
+    gradeScaleFactor = 1.0 / math.sqrt(v.numel() * Qp)
+    s = grad_scale(s, gradScaleFactor)
 
-    v_q = (v/s).round().clamp(Qn, Qp)
+    #s = 2 * v.abs().mean() / math.sqrt(Qp)
+
+    v_q = round_pass((v/s).clamp(Qn, Qp))
 
     return v_q, s
 
@@ -124,7 +127,7 @@ class BinarizeConv2d(nn.Conv2d):
         #self.k = kwargs['k']
 
         #psum step sizes
-        self.step_size_psum = kwargs['s']
+        self.step_size_psum = Parameter(torch.Tensor(1)) #kwargs['s']
 
         #buffer is not updated for optim.step
         self.register_buffer('init_state', torch.zeros(1))
@@ -136,13 +139,9 @@ class BinarizeConv2d(nn.Conv2d):
             self.weight.org=self.weight.data.clone()
         self.weight.data=Binarize(self.weight.org)
 
-        '''
         if self.init_state == 0:
-            out = get_psum(input, self.weight, self.padding, self.stride, T=self.T)
-            self.step_size_psum.data.copy_(2 * out.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
-            print(self.step_size_psum)
+            self.step_size_psum.data.copy_(2 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
             self.init_state.fill_(1)
-        '''
 
         #out = nn.functional.conv2d(input, self.weight, None, self.stride, self.padding, self.dilation, self.groups)
 

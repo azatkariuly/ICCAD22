@@ -211,12 +211,13 @@ def main():
     #logging.info('training regime: %s', regime)
 
     i = 0
-    for param in model.parameters():
-        param.requires_grad = False
+    for name, param in model.named_parameters():
+        print(name)
+        #param.requires_grad = False
         i += 1
 
     print('freezed', i, ' parameters')
-    #return
+    return
 
     for epoch in range(args.start_epoch, args.epochs):
         #for param_group in optimizer.param_groups:
