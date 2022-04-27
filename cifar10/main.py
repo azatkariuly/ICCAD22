@@ -199,10 +199,6 @@ def main():
     if args.evaluate:
         val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, 0)
         print('Best Accuracy:', val_prec1)
-
-        for name, param in model.named_parameters():
-            if 'step_size_psum' in name:
-                print(param)
         return
 
     train_data = get_dataset(args.dataset, 'train', transform['train'])
@@ -279,6 +275,9 @@ def main():
         results.save()
 
         print('Best Precision:', best_prec1)
+        for name, param in model.named_parameters():
+            if 'step_size_psum' in name:
+                print(param)
         scheduler.step()
 
 
@@ -341,7 +340,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
         end = time.time()
 
         # plot progress
-        bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f} | ss: {ss: .4f}'.format(
+        bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format( # | ss: {ss: .4f}'.format(
                     phase='TRAINING' if training else 'EVALUATING',
                     batch=i + 1,
                     size=len(data_loader),
@@ -353,7 +352,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                     top1=top1.avg,
                     top5=top5.avg,
                     #ss=16.0,
-                    ss=model.module.layer1[0].conv1.step_size_psum[0],
+                    #ss=model.module.layer1[0].conv1.step_size_psum[0],
                     )
         bar.next()
 
