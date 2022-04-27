@@ -115,11 +115,8 @@ def quant_PTQ1(v, s, p):
     Qn = -2**(p-1)
     Qp = 2**(p-1) - 1
 
-    #gradScaleFactor = 1.0 / math.sqrt(v.numel() * Qp)
-    #s = grad_scale(s, gradScaleFactor)
-
-    s = 2 * v.abs().mean() / math.sqrt(Qp)
-    print(s)
+    gradScaleFactor = 1.0 / math.sqrt(v.numel() * Qp)
+    s = grad_scale(s, gradScaleFactor)
 
     v_q = round_pass((v/s).clamp(Qn, Qp))
 
@@ -153,7 +150,7 @@ class BinarizeConv2d(nn.Conv2d):
         self.weight.data=Binarize(self.weight.org)
 
         if self.init_state == 0:
-            self.step_size_psum.data.copy_(2 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
+            self.step_size_psum.data.copy_(20 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
             self.init_state.fill_(1)
 
         #out = nn.functional.conv2d(input, self.weight, None, self.stride, self.padding, self.dilation, self.groups)
