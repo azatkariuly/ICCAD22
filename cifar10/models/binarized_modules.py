@@ -38,8 +38,8 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
 
     if step_size_psum is not None:
         psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
-        #out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
-        out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
+        out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
+        #out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
         return out * s
 
@@ -101,11 +101,21 @@ def quant(v, p):
 
     return v_q, s
 
-def quant_PTQ(v, s, p):
+def quant_PTQ(v, p):
     Qn = -2**(p-1)
     Qp = 2**(p-1) - 1
 
-    gradeScaleFactor = 1.0 / math.sqrt(v.numel() * Qp)
+    s = 2 * v.abs().mean() / math.sqrt(Qp)
+
+    v_q = (v/s).round().clamp(Qn, Qp)
+
+    return v_q, s
+
+def quant_PTQ1(v, s, p):
+    Qn = -2**(p-1)
+    Qp = 2**(p-1) - 1
+
+    gradScaleFactor = 1.0 / math.sqrt(v.numel() * Qp)
     s = grad_scale(s, gradScaleFactor)
 
     #s = 2 * v.abs().mean() / math.sqrt(Qp)
