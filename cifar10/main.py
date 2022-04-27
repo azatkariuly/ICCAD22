@@ -111,15 +111,6 @@ def main():
     logging.info("saving to %s", save_path)
     logging.debug("run arguments: %s", args)
 
-    '''
-    if 'cuda' in args.type:
-        args.gpus = [int(i) for i in args.gpus.split(',')]
-        torch.cuda.set_device(args.gpus[0])
-        cudnn.benchmark = True
-    else:
-        args.gpus = None
-    '''
-
     # create model
     logging.info("creating model %s", args.model)
     model = models.__dict__[args.model]
