@@ -212,15 +212,12 @@ def main():
 
     i = 0
     for name, param in model.named_parameters():
-        if 'step_size_psum' in name:
-            print(name, 'true for this case')
-        else:
-            print(name)
+        if 'step_size_psum' not in name:
+            param.requires_grad = False
         #param.requires_grad = False
         i += 1
 
     print('freezed', i, 'parameters')
-    return
 
     for epoch in range(args.start_epoch, args.epochs):
         #for param_group in optimizer.param_groups:
