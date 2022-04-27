@@ -210,6 +210,11 @@ def main():
 
     #logging.info('training regime: %s', regime)
 
+    for param in model.parameters():
+        print(param)
+
+    return
+
     for epoch in range(args.start_epoch, args.epochs):
         #for param_group in optimizer.param_groups:
         #    print('learning rate =', param_group['lr'])
