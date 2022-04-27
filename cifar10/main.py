@@ -211,7 +211,7 @@ def main():
     #logging.info('training regime: %s', regime)
 
     for name, param in model.named_parameters():
-        print(name, param)
+        print(name) #, param)
 
     return
 
