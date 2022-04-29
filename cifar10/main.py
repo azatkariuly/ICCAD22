@@ -88,6 +88,16 @@ parser.add_argument('-k', '--k', default=2, type=int,
 parser.add_argument('-s', '--s', default=2.0, type=float,
                     help='psum step size (default: 2.0)')
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 def main():
     if not torch.cuda.is_available():
         sys.exit(1)
