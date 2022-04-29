@@ -76,6 +76,9 @@ parser.add_argument('-prt', '--pretrained', type=str, metavar='FILE',
                     help='pretrained model FILE')
 parser.add_argument('-wb', '--wbits', default=1, type=int,
                     help='bitwidth for weights')
+parser.add_argument("-SA", type=str2bool, nargs='?',
+                    const=True, default=False,
+                    help="use saturating adder")
 parser.add_argument('-acc', '--acc_bits', default=8, type=int,
                     help='bitwidth for accumulator')
 parser.add_argument('-t', '--t', default=64, type=int,
@@ -115,7 +118,7 @@ def main():
     logging.info("creating model %s", args.model)
     model = models.__dict__[args.model]
     model_config = {'input_size': args.input_size, 'dataset': args.dataset,
-                    'nbits': args.wbits, 'T': args.t, 'nbits_acc': args.acc_bits,
+                    'nbits': args.wbits, 'T': args.t, 'SA': args.SA, 'nbits_acc': args.acc_bits,
                     'k': args.k, 's': args.s}
 
     if args.model_config is not '':

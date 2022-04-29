@@ -28,7 +28,7 @@ class satmm_psum(torch.autograd.Function):
         grad_weight = torch.matmul(A.transpose(1,2), grad_output)
         return grad_input, grad_weight, None
 
-def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=None):
+def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_size_psum=None):
     width=2**b # 256
     max = (width >> signed) - 1 #127 or 255
     min = max - width + 1
@@ -38,8 +38,10 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
 
     if step_size_psum is not None:
         psum_q, s = quant_PTQ1(psum, step_size_psum, nbits_psum)
-        out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
-        #out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
+        if SA:
+            out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
+        else:
+            out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
         return out * s
 
@@ -47,7 +49,7 @@ def satmm_cuda_temp(A, X, T=64, b=8, signed=True, nbits_psum=8, step_size_psum=N
     #out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
     #return out
 
-def satconv2D(image, kernel, padding=0, stride=1, T=64, b=8, signed=True,
+def satconv2D(image, kernel, padding=0, stride=1, T=64, SA=False, b=8, signed=True,
               nbits_psum=8, step_size_psum=None):
     #B,Cin,H,W
     #Cout, Cin, H,W
@@ -58,8 +60,9 @@ def satconv2D(image, kernel, padding=0, stride=1, T=64, b=8, signed=True,
     OH = (H - CH + 2 * padding[0]) // stride[0] + 1
     OW = (W - CW + 2 * padding[1]) // stride[0] + 1
     inp_unf = torch.nn.functional.unfold(image, (CH, CW),padding=padding,stride=stride)
-    return satmm_cuda_temp(inp_unf.transpose(1, 2),kernel.view(Cout, -1).t(), T=T, b=b, signed=signed,
-                           nbits_psum=nbits_psum, step_size_psum=step_size_psum).reshape(B,Cout,OH,OW)
+    return satmm_cuda_temp(inp_unf.transpose(1, 2),kernel.view(Cout, -1).t(),
+                           T=T, SA=SA, b=b, signed=signed, nbits_psum=nbits_psum,
+                           step_size_psum=step_size_psum).reshape(B,Cout,OH,OW)
 
 def Binarize(tensor,quant_mode='det'):
     if quant_mode=='det':
@@ -135,6 +138,7 @@ class BinarizeConv2d(nn.Conv2d):
         self.nbits_psum = self.nbits_acc - 3
 
         self.T = kwargs['T']
+        self.SA = kwargs['SA']
         #self.k = kwargs['k']
 
         #psum step sizes
@@ -157,7 +161,7 @@ class BinarizeConv2d(nn.Conv2d):
         #out = nn.functional.conv2d(input, self.weight, None, self.stride, self.padding, self.dilation, self.groups)
 
         out = satconv2D(input, self.weight, self.padding, self.stride,
-                        T=self.T, b=self.nbits_acc, signed=True,
+                        T=self.T, SA=self.SA, b=self.nbits_acc, signed=True,
                         nbits_psum=self.nbits_psum, step_size_psum=self.step_size_psum)
 
         #out = OA(out.int(), b=self.nbits_acc).float() + out - out.int()
