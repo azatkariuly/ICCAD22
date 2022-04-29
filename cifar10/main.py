@@ -76,8 +76,7 @@ parser.add_argument('-prt', '--pretrained', type=str, metavar='FILE',
                     help='pretrained model FILE')
 parser.add_argument('-wb', '--wbits', default=1, type=int,
                     help='bitwidth for weights')
-parser.add_argument("-SA", action=argparse.BooleanOptionalAction,
-                    help="use saturating adder")
+parser.add_argument('-SA', , action='store_true', help="use saturating adder")
 parser.add_argument('-acc', '--acc_bits', default=8, type=int,
                     help='bitwidth for accumulator')
 parser.add_argument('-t', '--t', default=64, type=int,
