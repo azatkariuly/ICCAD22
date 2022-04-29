@@ -76,8 +76,7 @@ parser.add_argument('-prt', '--pretrained', type=str, metavar='FILE',
                     help='pretrained model FILE')
 parser.add_argument('-wb', '--wbits', default=1, type=int,
                     help='bitwidth for weights')
-parser.add_argument("-SA", type=str2bool, nargs='?',
-                    const=True, default=False,
+parser.add_argument("-SA", action=argparse.BooleanOptionalAction,
                     help="use saturating adder")
 parser.add_argument('-acc', '--acc_bits', default=8, type=int,
                     help='bitwidth for accumulator')
@@ -87,16 +86,6 @@ parser.add_argument('-k', '--k', default=2, type=int,
                     help='WrapNet slope (default: 2)')
 parser.add_argument('-s', '--s', default=2.0, type=float,
                     help='psum step size (default: 2.0)')
-
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def main():
     if not torch.cuda.is_available():
