@@ -37,7 +37,8 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
     if step_size_psum is not None:
-        psum_q, s = quant_PTQ1(psum, step_size_psum, nbits_psum)
+        #psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
+        psum_q, s = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
         if SA:
             out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
         else:
@@ -94,28 +95,7 @@ def quantizeLSQ_psum(v, s, p):
 
     return vbar, s
 
-def quant(v, p):
-    ma = v.max()
-    mi = v.min()
-
-    #s = (ma-mi)/2**p
-    s = 128/2**p
-
-    v_q = (v/s).round()
-
-    return v_q, s
-
-def quant_PTQ(v, p):
-    Qn = -2**(p-1)
-    Qp = 2**(p-1) - 1
-
-    s = 2 * v.abs().mean() / math.sqrt(Qp)
-
-    v_q = (v/s).round().clamp(Qn, Qp)
-
-    return v_q, s
-
-def quant_PTQ1(v, s, p):
+def quant_PTQ(v, s, p):
     Qn = -2**(p-1)
     Qp = 2**(p-1) - 1
 
@@ -142,7 +122,7 @@ class BinarizeConv2d(nn.Conv2d):
         #self.k = kwargs['k']
 
         #psum step sizes
-        self.step_size_psum = Parameter(torch.ones(1)) #kwargs['s']
+        self.step_size_psum = kwargs['s'] #Parameter(torch.ones(1))
 
         #buffer is not updated for optim.step
         self.register_buffer('init_state', torch.zeros(1))
@@ -154,9 +134,11 @@ class BinarizeConv2d(nn.Conv2d):
             self.weight.org=self.weight.data.clone()
         self.weight.data=Binarize(self.weight.org)
 
+        '''
         if self.init_state == 0:
             self.step_size_psum.data.copy_(20 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
             self.init_state.fill_(1)
+        '''
 
         #out = nn.functional.conv2d(input, self.weight, None, self.stride, self.padding, self.dilation, self.groups)
 
