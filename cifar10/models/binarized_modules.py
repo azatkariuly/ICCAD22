@@ -38,13 +38,13 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
 
     if step_size_psum is not None:
         #psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
-        psum_q, s = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
+        psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
         if SA:
             out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
         else:
             out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
-        return out * s
+        return out * step_size_psum
 
     #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
     #out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
@@ -115,7 +115,7 @@ class BinarizeConv2d(nn.Conv2d):
                                         padding=padding, dilation=dilation, groups=groups, bias=bias)
 
         self.nbits_acc = kwargs['nbits_acc']
-        self.nbits_psum = self.nbits_acc - 3
+        self.nbits_psum = self.nbits_acc #- 3
 
         self.T = kwargs['T']
         self.SA = kwargs['SA']
