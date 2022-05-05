@@ -102,9 +102,9 @@ def quant_PTQ(v, s, p):
     gradScaleFactor = 1.0 / math.sqrt(v.numel() * Qp)
     s = grad_scale(s, gradScaleFactor)
 
-    v_q = round_pass((v/int(s)).clamp(Qn, Qp))
+    v_q = round_pass((v/s).clamp(Qn, Qp))
 
-    return v_q, int(s)
+    return v_q, s
 
 
 class BinarizeConv2d(nn.Conv2d):
@@ -122,8 +122,8 @@ class BinarizeConv2d(nn.Conv2d):
         #self.k = kwargs['k']
 
         #psum step sizes
-        self.step_size_psum = Parameter(torch.ones(1)) #kwargs['s']
-        self.step_size_psum = Parameter(torch.ones(1)) #kwargs['s']
+        #self.step_size_psum = Parameter(torch.ones(1)) #kwargs['s']
+        self.step_size_psum = Parameter(torch.ones(1)*8) #kwargs['s']
 
         #buffer is not updated for optim.step
         self.register_buffer('init_state', torch.zeros(1))
@@ -136,7 +136,7 @@ class BinarizeConv2d(nn.Conv2d):
         self.weight.data=Binarize(self.weight.org)
 
         if self.init_state == 0:
-            self.step_size_psum.data.copy_(20 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
+            #self.step_size_psum.data.copy_(20 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
             self.init_state.fill_(1)
 
         #out = nn.functional.conv2d(input, self.weight, None, self.stride, self.padding, self.dilation, self.groups)
