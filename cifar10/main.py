@@ -213,7 +213,6 @@ def main():
 
     #logging.info('training regime: %s', regime)
 
-    '''
     i = 0
     for name, param in model.named_parameters():
         if 'step_size_psum' not in name:
@@ -222,7 +221,6 @@ def main():
         i += 1
 
     print('freezed', i, 'parameters')
-    '''
 
     for epoch in range(args.start_epoch, args.epochs):
         #for param_group in optimizer.param_groups:
@@ -353,8 +351,8 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                     top1=top1.avg,
                     top5=top5.avg,
                     #ss=16.0,
-                    ss=model.module.layer1[0].conv1.step_size_psum,
-                    #ss=model.module.layer1[0].conv1.step_size_psum[0],
+                    #ss=model.module.layer1[0].conv1.step_size_psum,
+                    ss=model.module.layer1[0].conv1.step_size_psum[0],
                     )
         bar.next()
 
