@@ -123,7 +123,7 @@ class BinarizeConv2d(nn.Conv2d):
 
         #psum step sizes
         #self.step_size_psum = Parameter(torch.ones(1)) #kwargs['s']
-        self.step_size_psum = Parameter(200 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
+        self.step_size_psum = Parameter(1000 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
 
         #buffer is not updated for optim.step
         self.register_buffer('init_state', torch.zeros(1))
