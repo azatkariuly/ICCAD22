@@ -123,6 +123,7 @@ def main():
         model_config = dict(model_config, **literal_eval(args.model_config))
 
     model = model(**model_config)
+    model = nn.DataParallel(model).cuda()
     #print(model)
     logging.info("created model with configuration: %s", model_config)
 
@@ -145,7 +146,7 @@ def main():
         if not os.path.isfile(args.evaluate):
             parser.error('invalid checkpoint: {}'.format(args.evaluate))
         checkpoint = torch.load(args.evaluate)
-        model.load_state_dict(checkpoint['state_dict'])
+        model.load_state_dict(checkpoint['state_dict'], strict=False)
         logging.info("loaded checkpoint '%s' (epoch %s)",
                      args.evaluate, checkpoint['epoch'])
     elif args.resume:
@@ -165,7 +166,7 @@ def main():
         else:
             logging.error("no checkpoint found at '%s'", args.resume)
 
-    model = nn.DataParallel(model).cuda()
+    #model = nn.DataParallel(model).cuda()
 
     num_parameters = sum([l.nelement() for l in model.parameters()])
     logging.info("number of parameters: %d", num_parameters)
