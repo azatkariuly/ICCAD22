@@ -123,7 +123,7 @@ def main():
         model_config = dict(model_config, **literal_eval(args.model_config))
 
     model = model(**model_config)
-    model = nn.DataParallel(model).cuda()
+    #model = nn.DataParallel(model).cuda()
     #print(model)
     logging.info("created model with configuration: %s", model_config)
 
@@ -166,7 +166,7 @@ def main():
         else:
             logging.error("no checkpoint found at '%s'", args.resume)
 
-    #model = nn.DataParallel(model).cuda()
+    model = nn.DataParallel(model).cuda()
 
     num_parameters = sum([l.nelement() for l in model.parameters()])
     logging.info("number of parameters: %d", num_parameters)
