@@ -224,9 +224,9 @@ def main():
             param.requires_grad = False
         #param.requires_grad = False
         i += 1
-    '''
 
     print('freezed', i, 'parameters')
+    '''
 
     for epoch in range(args.start_epoch, args.epochs):
         #for param_group in optimizer.param_groups:
