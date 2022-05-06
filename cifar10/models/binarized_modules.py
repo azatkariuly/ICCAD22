@@ -102,9 +102,9 @@ def quant_PTQ(v, s, p):
     gradScaleFactor = 1.0 / math.sqrt(v.numel() * Qp)
     s = grad_scale(s, gradScaleFactor)
 
-    v_q = round_pass((v/s).clamp(Qn, Qp))
+    v_q = round_pass((v/int(s)).clamp(Qn, Qp))
 
-    return v_q, s
+    return v_q, int(s)
 
 
 class BinarizeConv2d(nn.Conv2d):
