@@ -34,7 +34,7 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
     min = max - width + 1
 
     satmm_cuda_psum = satmm_psum.apply
-    psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
+    psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)/2
 
     if step_size_psum is not None:
         #psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
@@ -46,7 +46,7 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
             #out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
             out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
-        return out
+        return out*2
     #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
     #out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
     #return out
