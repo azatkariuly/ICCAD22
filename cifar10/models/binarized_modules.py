@@ -118,10 +118,10 @@ class BinarizeConv2d(nn.Conv2d):
 
         self.T = kwargs['T']
         self.SA = kwargs['SA']
-        self.k = kwargs['k']
+        #self.k = kwargs['k']
 
         #psum step sizes
-        self.step_size_psum = Parameter(torch.ones(1)*self.k) #kwargs['s']
+        self.step_size_psum = kwargs['s'] #Parameter(torch.ones(1))
 
         #buffer is not updated for optim.step
         self.register_buffer('init_state', torch.zeros(1))
