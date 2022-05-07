@@ -34,19 +34,17 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
     min = max - width + 1
 
     satmm_cuda_psum = satmm_psum.apply
-    psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)/2
+    psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
     if step_size_psum is not None:
         #psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
-        #psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
+        psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
         if SA:
-            #out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
-            out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
+            out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)\
         else:
-            #out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
-            out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
+            out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
-        return out*2
+        return out*step_size_psum
     #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
     #out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
     #return out
@@ -116,14 +114,14 @@ class BinarizeConv2d(nn.Conv2d):
                                         padding=padding, dilation=dilation, groups=groups, bias=bias)
 
         self.nbits_acc = kwargs['nbits_acc']
-        self.nbits_psum = self.nbits_acc
+        self.nbits_psum = self.nbits_acc-3
 
         self.T = kwargs['T']
         self.SA = kwargs['SA']
-        #self.k = kwargs['k']
+        self.k = kwargs['k']
 
         #psum step sizes
-        self.step_size_psum = Parameter(torch.ones(1)) #kwargs['s']
+        self.step_size_psum = Parameter(torch.ones(1)*self.k) #kwargs['s']
 
         #buffer is not updated for optim.step
         self.register_buffer('init_state', torch.zeros(1))
