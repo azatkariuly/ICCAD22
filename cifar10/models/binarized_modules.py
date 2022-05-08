@@ -128,7 +128,7 @@ class BinarizeConv2d(nn.Conv2d):
                                         padding=padding, dilation=dilation, groups=groups, bias=bias)
 
         self.nbits_acc = kwargs['nbits_acc']
-        self.nbits_psum = kwargs['nbits_acc']
+        self.nbits_psum = kwargs['nbits_acc'] - 3
 
         self.T = kwargs['T']
         self.SA = kwargs['SA']
