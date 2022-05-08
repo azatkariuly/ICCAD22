@@ -1,3 +1,7 @@
+'''
+    created by: @azatkariuly
+'''
+
 #import mm_cuda_goliath1 as satmm_cuda
 import satmm_cuda
 import torch
