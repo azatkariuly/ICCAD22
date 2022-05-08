@@ -41,14 +41,15 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
     if step_size_psum is not None:
+        psum_q, s = quant_PTQ_cust(psum, nbits_psum)
         #psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
-        psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
+        #psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
         if SA:
             out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
         else:
             out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
-        return out*step_size_psum
+        return out*s #tep_size_psum
     #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
     #out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
     #return out
@@ -98,6 +99,15 @@ def quantizeLSQ_psum(v, s, p):
 
     return vbar, s
 
+def quant_PTQ_cust(v, p):
+    Qn = -2**(p-1)
+    Qp = 2**(p-1) - 1
+
+    delta = (v.max() - v.min())/(2**p - 1)
+    v_q = (v/delta).round().clip(-2**(p-1), 2**(p-1)-1)
+
+    return v_q, delta
+
 def quant_PTQ(v, s, p):
     Qn = -2**(p-1)
     Qp = 2**(p-1) - 1
@@ -118,7 +128,7 @@ class BinarizeConv2d(nn.Conv2d):
                                         padding=padding, dilation=dilation, groups=groups, bias=bias)
 
         self.nbits_acc = kwargs['nbits_acc']
-        self.nbits_psum = self.nbits_acc
+        self.nbits_psum = self.nbits_acc - kwargs['k']
 
         self.T = kwargs['T']
         self.SA = kwargs['SA']
