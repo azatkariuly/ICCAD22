@@ -142,7 +142,7 @@ def main():
         num_workers=args.workers, pin_memory=True)
 
     if args.evaluate:
-        val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, 0)
+        val_loss, val_prec1, val_prec5 = validate(0, val_loader, model, criterion, args)
         print('Best Accuracy:', val_prec1)
         return
 
