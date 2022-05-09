@@ -31,6 +31,7 @@ parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--weight_decay', type=float, default=0, help='weight decay')
 parser.add_argument('--save', type=str, default='./models', help='path for saving trained models')
 parser.add_argument('--data', metavar='DIR', default='/Dataset/ILSVRC2012/', help='path to dataset')
+parser.add_argument('-e', '--evaluate', type=str, metavar='FILE', help='evaluate model FILE on validation set')
 parser.add_argument('--label_smooth', type=float, default=0.1, help='label smoothing')
 parser.add_argument('-j', '--workers', default=40, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
@@ -61,6 +62,14 @@ def main():
     model = birealnet18()
     #logging.info(model)
     model = nn.DataParallel(model).cuda()
+
+    if args.evaluate:
+        if not os.path.isfile(args.evaluate):
+            parser.error('invalid checkpoint: {}'.format(args.evaluate))
+        checkpoint = torch.load(args.evaluate)
+        model.load_state_dict(checkpoint['state_dict'])
+        logging.info("loaded checkpoint '%s' (epoch %s)",
+                     args.evaluate, checkpoint['epoch'])
 
     criterion = nn.CrossEntropyLoss()
     criterion = criterion.cuda()
@@ -131,6 +140,11 @@ def main():
         ])),
         batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True)
+
+    if args.evaluate:
+        val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, 0)
+        print('Best Accuracy:', val_prec1)
+        return
 
     # train the model
     epoch = start_epoch
