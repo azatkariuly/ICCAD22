@@ -42,6 +42,8 @@ parser.add_argument('-acc', '--acc_bits', default=8, type=int,
                     help='bitwidth for accumulator')
 parser.add_argument('-s', '--s', default=2.0, type=float,
                     help='psum step size (default: 2.0)')
+parser.add_argument('-k', '--k', default=2, type=int,
+                    help='WrapNet slope (default: 2)')
 args = parser.parse_args()
 
 CLASSES = 1000
@@ -66,7 +68,7 @@ def main():
     logging.info("args = %s", args)
 
     # load model
-    model = birealnet18(nbits_acc=args.acc_bits, s=args.s, SA=args.SA)
+    model = birealnet18(nbits_acc=args.acc_bits, s=args.s, SA=args.SA, k=args.k)
     #logging.info(model)
     model = nn.DataParallel(model).cuda()
 
