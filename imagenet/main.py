@@ -207,7 +207,7 @@ def train(epoch, train_loader, model, criterion, optimizer, scheduler):
 
         # plot progress
         bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f} | ss: {ss: .4f}'.format(
-                    phase='TRAINING' if training else 'EVALUATING',
+                    phase='TRAINING',
                     batch=i + 1,
                     size=len(data_loader),
                     data=data_time.val,
@@ -265,7 +265,7 @@ def validate(epoch, val_loader, model, criterion, args):
             #progress.display(i)
             # plot progress
             bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
-                        phase='TRAINING' if training else 'EVALUATING',
+                        phase='EVALUATING',
                         batch=i + 1,
                         size=len(data_loader),
                         data=data_time.val,
