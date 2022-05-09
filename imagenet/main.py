@@ -35,7 +35,6 @@ parser.add_argument('-e', '--evaluate', type=str, metavar='FILE', help='evaluate
 parser.add_argument('--label_smooth', type=float, default=0.1, help='label smoothing')
 parser.add_argument('-j', '--workers', default=40, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-parser.add_argument('-SA', action='store_true', help="use saturating adder")
 parser.add_argument('-prt', '--pretrained', type=str, metavar='FILE',
                     help='pretrained model FILE')
 parser.add_argument('-SA', action='store_true', help="use saturating adder")

@@ -152,7 +152,7 @@ class HardBinaryConv(nn.Module):
         #print(binary_weights, flush=True)
         #y = F.conv2d(x, binary_weights, stride=self.stride, padding=self.padding)
 
-        y = satconv2D(x, binary_weights, self.padding, self.stride, T=64, b=self.nbits_acc,
+        y = satconv2D(x, binary_weights, self.padding, self.stride, T=64, SA=self.SA, b=self.nbits_acc,
                       signed=True, nbits_psum=self.nbits_psum, step_size_psum=self.step_size_psum)
         return y*scaling_factor.reshape(1, -1, 1, 1)
 
