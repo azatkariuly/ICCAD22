@@ -217,9 +217,6 @@ def train(epoch, train_loader, model, criterion, optimizer, scheduler):
                     loss=losses.avg,
                     top1=top1.avg,
                     top5=top5.avg,
-                    #ss=16.0,
-                    ss=model.module.layer1[0].conv1.step_size_psum,
-                    #ss=model.module.layer1[0].conv1.step_size_psum[0],
                     )
         bar.next()
 
