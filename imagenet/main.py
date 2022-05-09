@@ -59,7 +59,7 @@ def main():
 
     # load model
     model = birealnet18()
-    logging.info(model)
+    #logging.info(model)
     model = nn.DataParallel(model).cuda()
 
     criterion = nn.CrossEntropyLoss()
@@ -209,7 +209,7 @@ def train(epoch, train_loader, model, criterion, optimizer, scheduler):
         bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f} | ss: {ss: .4f}'.format(
                     phase='TRAINING',
                     batch=i + 1,
-                    size=len(data_loader),
+                    size=len(train_loader),
                     data=data_time.val,
                     bt=batch_time.val,
                     total=bar.elapsed_td,
@@ -267,7 +267,7 @@ def validate(epoch, val_loader, model, criterion, args):
             bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
                         phase='EVALUATING',
                         batch=i + 1,
-                        size=len(data_loader),
+                        size=len(val_loader),
                         data=data_time.val,
                         bt=batch_time.val,
                         total=bar.elapsed_td,
