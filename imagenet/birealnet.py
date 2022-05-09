@@ -51,6 +51,7 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
         #psum_q, s = quant_PTQ_cust(psum, nbits_psum)
         #psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
         psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
+        print(nbits_psum)
         if SA:
             out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
         else:
@@ -163,6 +164,7 @@ class HardBinaryConv(nn.Module):
 
         y = satconv2D(x, binary_weights, self.padding, self.stride, T=64, SA=self.SA, b=self.nbits_acc,
                       signed=True, nbits_psum=self.nbits_psum, step_size_psum=self.step_size_psum)
+
         return y*scaling_factor.reshape(1, -1, 1, 1)
 
 
