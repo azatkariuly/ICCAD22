@@ -75,7 +75,7 @@ def main():
             parser.error('invalid checkpoint: {}'.format(args.pretrained))
 
         checkpoint = torch.load(args.pretrained)
-        model.load_state_dict(checkpoint['state_dict'])
+        model.load_state_dict(checkpoint['state_dict'], strict=False)
 
         logging.info("loaded checkpoint '%s' (epoch %s)",
                      args.pretrained, checkpoint['epoch'])
@@ -83,7 +83,7 @@ def main():
         if not os.path.isfile(args.evaluate):
             parser.error('invalid checkpoint: {}'.format(args.evaluate))
         checkpoint = torch.load(args.evaluate)
-        model.load_state_dict(checkpoint['state_dict'])
+        model.load_state_dict(checkpoint['state_dict'], strict=False)
         logging.info("loaded checkpoint '%s' (epoch %s)",
                      args.evaluate, checkpoint['epoch'])
 
