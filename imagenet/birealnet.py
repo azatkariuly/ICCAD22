@@ -47,6 +47,7 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
     satmm_cuda_psum = satmm_psum.apply
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
+    '''
     if step_size_psum is not None:
         #psum_q, s = quant_PTQ_cust(psum, nbits_psum)
         #psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
@@ -57,9 +58,10 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
             out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
         return out*step_size_psum
+    '''
     #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
-    #out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
-    #return out
+    out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
+    return out
 
 def satconv2D(image, kernel, padding=0, stride=1, T=64, SA=False, b=8, signed=True,
               nbits_psum=8, step_size_psum=None):
@@ -69,8 +71,8 @@ def satconv2D(image, kernel, padding=0, stride=1, T=64, SA=False, b=8, signed=Tr
     # Gather Shapes of Kernel + Image + Padding
     B,Cin,H,W=image.shape
     Cout,_,CH,CW = kernel.shape
-    OH = (H - CH + 2 * padding[0]) // stride[0] + 1
-    OW = (W - CW + 2 * padding[1]) // stride[0] + 1
+    OH = (H - CH + 2 * padding) // stride + 1
+    OW = (W - CW + 2 * padding) // stride + 1
     inp_unf = torch.nn.functional.unfold(image, (CH, CW),padding=padding,stride=stride)
     return satmm_cuda_temp(inp_unf.transpose(1, 2),kernel.view(Cout, -1).t(),
                            T=T, SA=SA, b=b, signed=signed, nbits_psum=nbits_psum,
