@@ -279,7 +279,6 @@ def validate(epoch, val_loader, model, criterion, args):
                         phase='EVALUATING',
                         batch=i + 1,
                         size=len(val_loader),
-                        data=data_time.val,
                         bt=batch_time.val,
                         total=bar.elapsed_td,
                         eta=bar.eta_td,
