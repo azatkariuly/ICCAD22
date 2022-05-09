@@ -275,7 +275,7 @@ def validate(epoch, val_loader, model, criterion, args):
 
             #progress.display(i)
             # plot progress
-            bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
+            bar.suffix  = '{phase} - ({batch}/{size}) | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
                         phase='EVALUATING',
                         batch=i + 1,
                         size=len(val_loader),
