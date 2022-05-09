@@ -134,10 +134,9 @@ def main():
 
     # train the model
     epoch = start_epoch
-    bar = Bar('Processing', max=len(data_loader))
     while epoch < args.epochs:
-        train_obj, train_top1_acc,  train_top5_acc = train(epoch,  train_loader, model, criterion_smooth, optimizer, scheduler, bar)
-        valid_obj, valid_top1_acc, valid_top5_acc = validate(epoch, val_loader, model, criterion, args, bar)
+        train_obj, train_top1_acc,  train_top5_acc = train(epoch,  train_loader, model, criterion_smooth, optimizer, scheduler)
+        valid_obj, valid_top1_acc, valid_top5_acc = validate(epoch, val_loader, model, criterion, args)
 
         is_best = False
         if valid_top1_acc > best_top1_acc:
@@ -157,7 +156,7 @@ def main():
     print('total training time = {} hours'.format(training_time))
 
 
-def train(epoch, train_loader, model, criterion, optimizer, scheduler, bar):
+def train(epoch, train_loader, model, criterion, optimizer, scheduler):
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
@@ -177,6 +176,8 @@ def train(epoch, train_loader, model, criterion, optimizer, scheduler, bar):
         cur_lr = param_group['lr']
     print('learning_rate:', cur_lr)
 
+
+    bar = Bar('Processing', max=len(train_loader))
     for i, (images, target) in enumerate(train_loader):
         data_time.update(time.time() - end)
         images = images.cuda()
@@ -226,7 +227,7 @@ def train(epoch, train_loader, model, criterion, optimizer, scheduler, bar):
 
     return losses.avg, top1.avg, top5.avg
 
-def validate(epoch, val_loader, model, criterion, args, bar):
+def validate(epoch, val_loader, model, criterion, args):
     batch_time = AverageMeter('Time', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
     top1 = AverageMeter('Acc@1', ':6.2f')
@@ -238,6 +239,8 @@ def validate(epoch, val_loader, model, criterion, args, bar):
 
     # switch to evaluation mode
     model.eval()
+
+    bar = Bar('Processing', max=len(val_loader))
     with torch.no_grad():
         end = time.time()
         for i, (images, target) in enumerate(val_loader):
