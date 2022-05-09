@@ -35,6 +35,13 @@ parser.add_argument('-e', '--evaluate', type=str, metavar='FILE', help='evaluate
 parser.add_argument('--label_smooth', type=float, default=0.1, help='label smoothing')
 parser.add_argument('-j', '--workers', default=40, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
+parser.add_argument('-prt', '--pretrained', type=str, metavar='FILE',
+                    help='pretrained model FILE')
+parser.add_argument('-SA', action='store_true', help="use saturating adder")
+parser.add_argument('-acc', '--acc_bits', default=8, type=int,
+                    help='bitwidth for accumulator')
+parser.add_argument('-s', '--s', default=2.0, type=float,
+                    help='psum step size (default: 2.0)')
 args = parser.parse_args()
 
 CLASSES = 1000
@@ -59,10 +66,19 @@ def main():
     logging.info("args = %s", args)
 
     # load model
-    model = birealnet18()
+    model = birealnet18(nbits_acc=args.acc_bits, s=args.s)
     #logging.info(model)
     model = nn.DataParallel(model).cuda()
 
+    if args.pretrained:
+        if not os.path.isfile(args.pretrained):
+            parser.error('invalid checkpoint: {}'.format(args.pretrained))
+
+        checkpoint = torch.load(args.pretrained)
+        model.load_state_dict(checkpoint['state_dict'])
+
+        logging.info("loaded checkpoint '%s' (epoch %s)",
+                     args.pretrained, checkpoint['epoch'])
     if args.evaluate:
         if not os.path.isfile(args.evaluate):
             parser.error('invalid checkpoint: {}'.format(args.evaluate))

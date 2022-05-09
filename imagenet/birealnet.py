@@ -184,11 +184,11 @@ def OA(x, b=4):
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, nbits_acc=8, nbits_psum=8, s=8):
+    def __init__(self, inplanes, planes, stride=1, downsample=None, nbits_acc=8, s=8):
         super(BasicBlock, self).__init__()
 
         self.binary_activation = BinaryActivation()
-        self.binary_conv = HardBinaryConv(inplanes, planes, stride=stride, nbits_acc=nbits_acc, nbits_psum=nbits_psum, s=s)
+        self.binary_conv = HardBinaryConv(inplanes, planes, stride=stride, nbits_acc=nbits_acc, s=s)
         self.bn1 = nn.BatchNorm2d(planes)
 
         self.downsample = downsample
@@ -210,7 +210,7 @@ class BasicBlock(nn.Module):
 
 class BiRealNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False, nbits_acc=8, nbits_psum=8, s=8):
+    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False, nbits_acc=8, s=8):
         super(BiRealNet, self).__init__()
         self.inplanes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -218,13 +218,13 @@ class BiRealNet(nn.Module):
         self.bn1 = nn.BatchNorm2d(64)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0], nbits_acc=nbits_acc, nbits_psum=nbits_psum, s=s)
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, nbits_acc=nbits_acc, nbits_psum=nbits_psum, s=s)
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, nbits_acc=nbits_acc, nbits_psum=nbits_psum, s=s)
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, nbits_acc=nbits_acc, nbits_psum=nbits_psum, s=s)
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, nbits_acc=nbits_acc, s=s)
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, nbits_acc=nbits_acc, s=s)
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, nbits_acc=nbits_acc, s=s)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
-    def _make_layer(self, block, planes, blocks, stride=1, nbits_acc=8, nbits_psum=8, s=8):
+    def _make_layer(self, block, planes, blocks, stride=1, nbits_acc=8, s=8):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
@@ -234,10 +234,10 @@ class BiRealNet(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, nbits_acc=nbits_acc, nbits_psum=nbits_psum, s=s))
+        layers.append(block(self.inplanes, planes, stride, downsample, nbits_acc=nbits_acc, s=s))
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes, nbits_acc=nbits_acc, nbits_psum=nbits_psum, s=s))
+            layers.append(block(self.inplanes, planes, nbits_acc=nbits_acc, s=s))
 
         return nn.Sequential(*layers)
 
