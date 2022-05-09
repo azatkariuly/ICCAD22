@@ -206,7 +206,7 @@ def train(epoch, train_loader, model, criterion, optimizer, scheduler):
         #progress.display(i)
 
         # plot progress
-        bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f} | ss: {ss: .4f}'.format(
+        bar.suffix  = '{phase} - ({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
                     phase='TRAINING',
                     batch=i + 1,
                     size=len(train_loader),
