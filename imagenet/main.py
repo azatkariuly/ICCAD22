@@ -29,6 +29,8 @@ parser.add_argument('--epochs', type=int, default=256, help='num of training epo
 parser.add_argument('--learning_rate', type=float, default=0.001, help='init learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--weight_decay', type=float, default=0, help='weight decay')
+parser.add_argument('--results_dir', metavar='RESULTS_DIR', default='./results',
+                    help='results dir')
 parser.add_argument('--save', metavar='SAVE', default='garbage', help='saved folder')
 parser.add_argument('--data', metavar='DIR', default='/Dataset/ILSVRC2012/', help='path to dataset')
 parser.add_argument('-e', '--evaluate', type=str, metavar='FILE', help='evaluate model FILE on validation set')
