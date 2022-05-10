@@ -29,7 +29,7 @@ parser.add_argument('--epochs', type=int, default=256, help='num of training epo
 parser.add_argument('--learning_rate', type=float, default=0.001, help='init learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--weight_decay', type=float, default=0, help='weight decay')
-parser.add_argument('--save', type=str, default='./models', help='path for saving trained models')
+parser.add_argument('--save', metavar='SAVE', default='garbage', help='saved folder')
 parser.add_argument('--data', metavar='DIR', default='/Dataset/ILSVRC2012/', help='path to dataset')
 parser.add_argument('-e', '--evaluate', type=str, metavar='FILE', help='evaluate model FILE on validation set')
 parser.add_argument('--label_smooth', type=float, default=0.1, help='label smoothing')
@@ -38,6 +38,8 @@ parser.add_argument('-j', '--workers', default=40, type=int, metavar='N',
 parser.add_argument('-prt', '--pretrained', type=str, metavar='FILE',
                     help='pretrained model FILE')
 parser.add_argument('-SA', action='store_true', help="use saturating adder")
+parser.add_argument('--resume', default='', type=str, metavar='PATH',
+                    help='path to latest checkpoint (default: none)')
 parser.add_argument('-acc', '--acc_bits', default=8, type=int,
                     help='bitwidth for accumulator')
 parser.add_argument('-s', '--s', default=2.0, type=float,
@@ -63,6 +65,12 @@ def main():
         sys.exit(1)
     start_t = time.time()
 
+    if args.save is '':
+        args.save = datetime.now().strftime('/garbage')
+    save_path = os.path.join(args.results_dir, args.save)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
     cudnn.benchmark = True
     cudnn.enabled=True
     logging.info("args = %s", args)
@@ -71,23 +79,6 @@ def main():
     model = birealnet18(nbits_acc=args.acc_bits, s=args.s, SA=args.SA, k=args.k)
     #logging.info(model)
     model = nn.DataParallel(model).cuda()
-
-    if args.pretrained:
-        if not os.path.isfile(args.pretrained):
-            parser.error('invalid checkpoint: {}'.format(args.pretrained))
-
-        checkpoint = torch.load(args.pretrained)
-        model.load_state_dict(checkpoint['state_dict'], strict=False)
-
-        logging.info("loaded checkpoint '%s' (epoch %s)",
-                     args.pretrained, checkpoint['epoch'])
-    if args.evaluate:
-        if not os.path.isfile(args.evaluate):
-            parser.error('invalid checkpoint: {}'.format(args.evaluate))
-        checkpoint = torch.load(args.evaluate)
-        model.load_state_dict(checkpoint['state_dict'], strict=False)
-        logging.info("loaded checkpoint '%s' (epoch %s)",
-                     args.evaluate, checkpoint['epoch'])
 
     criterion = nn.CrossEntropyLoss()
     criterion = criterion.cuda()
@@ -111,18 +102,35 @@ def main():
     start_epoch = 0
     best_top1_acc= 0
 
-    checkpoint_tar = os.path.join(args.save, 'checkpoint.pth.tar')
-    if os.path.exists(checkpoint_tar):
-        logging.info('loading checkpoint {} ..........'.format(checkpoint_tar))
+    if args.pretrained:
+        if not os.path.isfile(args.pretrained):
+            parser.error('invalid checkpoint: {}'.format(args.pretrained))
+
+        checkpoint = torch.load(args.pretrained)
+        model.load_state_dict(checkpoint['state_dict'], strict=False)
+
+        logging.info("loaded checkpoint '%s' (epoch %s)",
+                     args.pretrained, checkpoint['epoch'])
+    if args.evaluate:
+        if not os.path.isfile(args.evaluate):
+            parser.error('invalid checkpoint: {}'.format(args.evaluate))
+        checkpoint = torch.load(args.evaluate)
+        model.load_state_dict(checkpoint['state_dict'], strict=False)
+        logging.info("loaded checkpoint '%s' (epoch %s)",
+                     args.evaluate, checkpoint['epoch'])
+    elif args.resume:
+        checkpoint_tar = args.resume
+        if not os.path.isfile(checkpoint_tar):
+            parser.error('invalid resume checkpoint: {}'.format(checkpoint_tar))
         checkpoint = torch.load(checkpoint_tar)
         start_epoch = checkpoint['epoch']
         best_top1_acc = checkpoint['best_top1_acc']
         model.load_state_dict(checkpoint['state_dict'], strict=False)
-        logging.info("loaded checkpoint {} epoch = {}" .format(checkpoint_tar, checkpoint['epoch']))
+        logging.info("loading checkpoint '%s'", args.resume)
 
-    # adjust the learning rate according to the checkpoint
-    for epoch in range(start_epoch):
-        scheduler.step()
+        # adjust the learning rate according to the checkpoint
+        for epoch in range(start_epoch):
+            scheduler.step()
 
     # load training data
     traindir = os.path.join(args.data, 'train')
@@ -180,7 +188,7 @@ def main():
             'state_dict': model.state_dict(),
             'best_top1_acc': best_top1_acc,
             'optimizer' : optimizer.state_dict(),
-            }, is_best, args.save)
+            }, is_best, save_path)
 
         epoch += 1
 
