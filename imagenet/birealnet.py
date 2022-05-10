@@ -139,7 +139,7 @@ class HardBinaryConv(nn.Module):
         self.weights = nn.Parameter(torch.rand((self.number_of_weights,1)) * 0.001, requires_grad=True)
 
         self.nbits_acc = kwargs['nbits_acc']
-        self.nbits_psum = kwargs['nbits_acc']
+        self.nbits_psum = kwargs['nbits_acc'] - 3
 
         self.SA = kwargs['SA']
         #self.k = kwargs['k']
