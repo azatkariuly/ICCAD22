@@ -139,16 +139,13 @@ class HardBinaryConv(nn.Module):
         self.weights = nn.Parameter(torch.rand((self.number_of_weights,1)) * 0.001, requires_grad=True)
 
         self.nbits_acc = kwargs['nbits_acc']
-        self.nbits_psum = kwargs['k'] #kwargs['nbits_acc']
+        self.nbits_psum = kwargs['nbits_acc']
 
         self.SA = kwargs['SA']
         #self.k = kwargs['k']
 
         #psum step sizes
         self.step_size_psum = kwargs['s'] #Parameter(torch.ones(1))
-
-        #buffer is not updated for optim.step
-        self.register_buffer('init_state', torch.zeros(1))
 
     def forward(self, x):
         real_weights = self.weights.view(self.shape)
