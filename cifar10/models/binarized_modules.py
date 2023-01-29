@@ -121,7 +121,7 @@ def quantizeLSQ_psum(v, s, p):
     #gradScaleFactor = 1.0 / math.sqrt(v.numel()*Qp)
     #s = grad_scale(s, gradScaleFactor)
 
-    vbar = round_pass((v/s).clamp(Qn, Qp))
+    vbar = round_pass((v/s)) #.clamp(Qn, Qp))
     #vhat = vbar * s
 
     return vbar, s
