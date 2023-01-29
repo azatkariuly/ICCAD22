@@ -40,20 +40,20 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
     satmm_cuda_psum = satmm_psum.apply
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
-    # if step_size_psum is not None:
-    #     # psum_q, s = quant_PTQ_cust(psum, nbits_psum)
-    #     # psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
-    #     psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
-    #
-    #     if SA:
-    #         out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
-    #     else:
-    #         out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
-    #     #out = cyclic_activation(out, k=2, b=b)
-    #     return out*step_size_psum
+    if step_size_psum is not None:
+        psum_q, s = quant_PTQ_cust(psum, nbits_psum)
+        # psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
+        # psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
+
+        if SA:
+            out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
+        else:
+            out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
+        #out = cyclic_activation(out, k=2, b=b)
+        return out*s #tep_size_psum
     #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
-    out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
-    return out
+    # out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
+    # return out
 
 def satconv2D(image, kernel, padding=0, stride=1, T=64, SA=False, b=8, signed=True,
               nbits_psum=8, step_size_psum=None):
@@ -130,7 +130,7 @@ class BinarizeConv2d(nn.Conv2d):
                                         padding=padding, dilation=dilation, groups=groups, bias=bias)
 
         self.nbits_acc = kwargs['nbits_acc']
-        self.nbits_psum = kwargs['nbits_acc']
+        self.nbits_psum = kwargs['k']
 
         self.T = kwargs['T']
         self.SA = kwargs['SA']
