@@ -68,7 +68,7 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
             if N >= 27:
                 shift_value = 6
             else:
-                shift_value = 4
+                shift_value = 5
 
         # psum_q, s = quant_PTQ_cust(psum, nbits_psum)
         # psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
