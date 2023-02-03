@@ -48,8 +48,44 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
     if step_size_psum is not None:
+        N = psum.shape[3]
+
+        shift_value = 4
+        if b == 7:
+            if N >= 35:
+                shift_value = 3
+            else:
+                shift_value = 2
+        if b == 6:
+            if N >= 34:
+                shift_value = 4
+            else:
+                shift_value = 3
+        if b == 5:
+            if N >= 10:
+                shift_value = 4
+            else:
+                shift_value = 3
+        if b == 4:
+            if N >= 30:
+                shift_value = 5
+            else:
+                shift_value = 4
+        if b == 3:
+            if N >= 27:
+                shift_value = 6
+            else:
+                shift_value = 5
+        if b == 2:
+            if N >= 28:
+                shift_value = 6
+            else:
+                shift_value = 5
+
         #psum_q, s = quant_PTQ_cust(psum, nbits_psum)
-        psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
+        # psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
+        psum_q, _ = quantizeLSQ_psum(psum, 2**shift_value, nbits_psum)
+
         if SA:
             out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
         else:
