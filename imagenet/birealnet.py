@@ -87,11 +87,11 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
         psum_q, _ = quantizeLSQ_psum(psum, 2**shift_value, nbits_psum)
 
         if SA:
-            print('doing fucking sa')
             out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
         else:
-            print('doing normal oa')
+            print(shift_value)
             out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
+            return
         #out = cyclic_activation(out, k=2, b=b)
         return out*(2**shift_value) #step_size_psum
     #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
