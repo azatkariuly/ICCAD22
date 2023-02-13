@@ -79,7 +79,7 @@ def main():
 
     # load model
     model = birealnet18(nbits_acc=args.acc_bits, s=args.s, SA=args.SA, k=args.k)
-    #logging.info(model)
+    logging.info(model)
     model = nn.DataParallel(model).cuda()
 
     criterion = nn.CrossEntropyLoss()
