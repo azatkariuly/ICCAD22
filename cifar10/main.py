@@ -124,7 +124,7 @@ def main():
 
     model = model(**model_config)
     #model = nn.DataParallel(model).cuda()
-    #print(model)
+    print(model)
     logging.info("created model with configuration: %s", model_config)
 
 
