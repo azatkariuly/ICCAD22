@@ -216,7 +216,7 @@ class BinarizeConv2d(nn.Conv2d):
         #                 T=self.T, SA=self.SA, b=self.nbits_acc, signed=True,
         #                 nbits_psum=self.nbits_psum, step_size_psum=self.step_size_psum)
 
-        out = OA(out.int(), b=self.nbits_acc).float() + out - out.int()
+        # out = OA(out.int(), b=self.nbits_acc).float() + out - out.int()
 
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
