@@ -85,7 +85,7 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
         else:
             out = OA(torch.sum(psum_q, axis=3).squeeze().transpose(1,-1), b=b)
         #out = cyclic_activation(out, k=2, b=b)
-        return out*(2**shift_value) #step_size_psum
+        return out*s #(2**shift_value) #step_size_psum
 
     #out = reduce(lambda x,y: (x+y).clip(min, max), psum.transpose(0,3)).squeeze().transpose(0,-1)
     # out = OA(torch.sum(psum, axis=3).squeeze().transpose(1,-1), b=b)
@@ -212,11 +212,11 @@ class BinarizeConv2d(nn.Conv2d):
         '''
         # out = nn.functional.conv2d(input, self.weight, None, self.stride, self.padding, self.dilation, self.groups)
 
-        out = satconv2D(input, self.weight, self.padding, self.stride,
-                        T=self.T, SA=self.SA, b=self.nbits_acc, signed=True,
-                        nbits_psum=self.nbits_psum, step_size_psum=self.step_size_psum)
+        # out = satconv2D(input, self.weight, self.padding, self.stride,
+        #                 T=self.T, SA=self.SA, b=self.nbits_acc, signed=True,
+        #                 nbits_psum=self.nbits_psum, step_size_psum=self.step_size_psum)
 
-        #out = OA(out.int(), b=self.nbits_acc).float() + out - out.int()
+        out = OA(out.int(), b=self.nbits_acc).float() + out - out.int()
 
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
