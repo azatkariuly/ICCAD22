@@ -166,7 +166,7 @@ def main():
         else:
             logging.error("no checkpoint found at '%s'", args.resume)
 
-    model = nn.DataParallel(model).cuda()
+    # model = nn.DataParallel(model).cuda()
 
     num_parameters = sum([l.nelement() for l in model.parameters()])
     logging.info("number of parameters: %d", num_parameters)
