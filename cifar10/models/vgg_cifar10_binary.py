@@ -75,7 +75,7 @@ class VGG_Cifar10(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        x = x.view(-1, 512 * 4 * 4)
+        x = x.reshape(-1, 512 * 4 * 4)
         x = self.classifier(x)
         return x
 
