@@ -41,44 +41,44 @@ def satmm_cuda_temp(A, X, T=64, SA=False, b=8, signed=True, nbits_psum=8, step_s
     psum = satmm_cuda_psum(A.contiguous(),X.contiguous(), T)
 
     if step_size_psum is not None:
-        N = psum.shape[3]
+    #     N = psum.shape[3]
+    #
+    #     shift_value = 4
+    #     if b == 7:
+    #         if N >= 35:
+    #             shift_value = 3
+    #         else:
+    #             shift_value = 2
+    #     if b == 6:
+    #         if N >= 34:
+    #             shift_value = 4
+    #         else:
+    #             shift_value = 3
+    #     if b == 5:
+    #         if N >= 10:
+    #             shift_value = 4
+    #         else:
+    #             shift_value = 3
+    #     if b == 4:
+    #         if N >= 30:
+    #             shift_value = 5
+    #         else:
+    #             shift_value = 4
+    #     if b == 3:
+    #         if N >= 27:
+    #             shift_value = 6
+    #         else:
+    #             shift_value = 5
+    #     if b == 2:
+    #         if N >= 28:
+    #             shift_value = 6
+    #         else:
+    #             shift_value = 5
 
-        shift_value = 4
-        if b == 7:
-            if N >= 35:
-                shift_value = 3
-            else:
-                shift_value = 2
-        if b == 6:
-            if N >= 34:
-                shift_value = 4
-            else:
-                shift_value = 3
-        if b == 5:
-            if N >= 10:
-                shift_value = 4
-            else:
-                shift_value = 3
-        if b == 4:
-            if N >= 30:
-                shift_value = 5
-            else:
-                shift_value = 4
-        if b == 3:
-            if N >= 27:
-                shift_value = 6
-            else:
-                shift_value = 5
-        if b == 2:
-            if N >= 28:
-                shift_value = 6
-            else:
-                shift_value = 5
-
-        # psum_q, s = quant_PTQ_cust(psum, nbits_psum)
+        psum_q, s = quant_PTQ_cust(psum, nbits_psum)
         # psum_q, s = quant_PTQ(psum, step_size_psum, nbits_psum)
         # psum_q, _ = quantizeLSQ_psum(psum, step_size_psum, nbits_psum)
-        psum_q, _ = quantizeLSQ_psum(psum, 2**shift_value, nbits_psum)
+        # psum_q, _ = quantizeLSQ_psum(psum, 2**shift_value, nbits_psum)
 
         if SA:
             out = reduce(lambda x,y: (x+y).clip(min, max), psum_q.transpose(0,3)).squeeze().transpose(0,-1)
@@ -186,7 +186,7 @@ class BinarizeConv2d(nn.Conv2d):
                                         padding=padding, dilation=dilation, groups=groups, bias=bias)
 
         self.nbits_acc = kwargs['nbits_acc']
-        self.nbits_psum = kwargs['nbits_acc']
+        self.nbits_psum = kwargs['k']
 
         self.T = kwargs['T']
         self.SA = kwargs['SA']
@@ -210,11 +210,11 @@ class BinarizeConv2d(nn.Conv2d):
             self.step_size_psum.data.copy_(20 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits_psum - 1) - 1))
             self.init_state.fill_(1)
         '''
-        out = nn.functional.conv2d(input, self.weight, None, self.stride, self.padding, self.dilation, self.groups)
+        # out = nn.functional.conv2d(input, self.weight, None, self.stride, self.padding, self.dilation, self.groups)
 
-        # out = satconv2D(input, self.weight, self.padding, self.stride,
-        #                 T=self.T, SA=self.SA, b=self.nbits_acc, signed=True,
-        #                 nbits_psum=self.nbits_psum, step_size_psum=self.step_size_psum)
+        out = satconv2D(input, self.weight, self.padding, self.stride,
+                        T=self.T, SA=self.SA, b=self.nbits_acc, signed=True,
+                        nbits_psum=self.nbits_psum, step_size_psum=self.step_size_psum)
 
         #out = OA(out.int(), b=self.nbits_acc).float() + out - out.int()
 
